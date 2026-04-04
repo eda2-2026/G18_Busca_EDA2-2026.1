@@ -76,7 +76,10 @@ A qualidade da compressao e medida pelo **PSNR** (Peak Signal-to-Noise Ratio), e
 ## Testes
 ```bash
 python test_issue1.py
+python test_issue2.py
+python test_issue3.py
 python test_issue4.py
+python test_issue7.py
 ```
 
 ---
