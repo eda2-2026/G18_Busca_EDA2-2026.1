@@ -46,3 +46,29 @@ def psnr(original, comprimida):
     max_pixel = 255.0
     # Calcula o PSNR usando a fórmula e a base log10 do numpy
     return 10 * np.log10((max_pixel ** 2) / mse)
+
+def cor_media(pixels, x, y, largura, altura) -> int:
+    """
+    Calcula a cor média de um bloco retangular da imagem usando NumPy.
+    Retorna o valor como um inteiro.
+    """
+    # Extrai o bloco da imagem usando slicing (y é a linha, x é a coluna)
+    bloco = pixels[y:y+altura, x:x+largura]
+    
+    if bloco.size == 0:
+        return 0
+        
+    return int(np.mean(bloco))
+
+def variancia(pixels, x, y, largura, altura) -> float:
+    """
+    Calcula a variância das cores de um bloco retangular da imagem usando NumPy.
+    Retorna o valor como um float.
+    """
+    # Extrai o bloco da imagem usando slicing
+    bloco = pixels[y:y+altura, x:x+largura]
+    
+    if bloco.size == 0:
+        return 0.0
+        
+    return float(np.var(bloco))
