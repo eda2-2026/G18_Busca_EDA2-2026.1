@@ -1,5 +1,7 @@
 from PIL import Image
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 def carregar(caminho):
     """
@@ -72,3 +74,59 @@ def variancia(pixels, x, y, largura, altura) -> float:
         return 0.0
         
     return float(np.var(bloco))
+
+def mostrar_comparativo(original, comprimida, psnr_val, limiar):
+    """
+    Exibe a imagem original e a comprimida lado a lado usando Matplotlib.
+    Adiciona os valores de PSNR e Limiar no título para comparação.
+    """
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+    
+    # Imagem original
+    ax[0].imshow(original, cmap='gray', vmin=0, vmax=255)
+    ax[0].set_title("Original")
+    ax[0].axis('off')
+    
+    # Imagem comprimida
+    ax[1].imshow(comprimida, cmap='gray', vmin=0, vmax=255)
+    ax[1].set_title(f"Comprimida (Limiar: {limiar}) | PSNR: {psnr_val:.2f} dB")
+    ax[1].axis('off')
+    
+    plt.tight_layout()
+    plt.show()
+
+def desenhar_blocos(pixels, quadtree):
+    """
+    Mostra a imagem e desenha as bordas (quadrados vermelhos) correspondentes 
+    aos blocos homogêneos (folhas) encontrados pela Quadtree usando Matplotlib.
+    """
+    fig, ax = plt.subplots(1, figsize=(8, 8))
+    
+    # Exibe a imagem de fundo
+    ax.imshow(pixels, cmap='gray', vmin=0, vmax=255)
+    ax.axis('off')
+    ax.set_title(f"Divisão dos Blocos - QuadTree (Limiar: {quadtree.limiar})")
+    
+    # Função interna para percorrer a árvore e desenhar as fronteiras
+    def destacar_nos(no):
+        if no is None:
+            return
+            
+        if no.eh_folha:
+            # Desenha um retângulo vermelho sem preenchimento ao redor do bloco
+            rect = patches.Rectangle(
+                (no.x, no.y), no.largura, no.altura, 
+                linewidth=0.5, edgecolor='red', facecolor='none'
+            )
+            ax.add_patch(rect)
+        else:
+            # Busca recursiva nos filhos
+            for filho in no.filhos:
+                destacar_nos(filho)
+                
+    # Inicia a recursão pela raiz
+    if quadtree.raiz is not None:
+        destacar_nos(quadtree.raiz)
+        
+    plt.tight_layout()
+    plt.show()
