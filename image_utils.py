@@ -75,7 +75,7 @@ def variancia(pixels, x, y, largura, altura) -> float:
         
     return float(np.var(bloco))
 
-def mostrar_comparativo(original, comprimida, psnr_val, limiar):
+def mostrar_comparativo(original, comprimida, psnr_val, limiar, tamanho_original=None, tamanho_comprimida=None):
     """
     Exibe a imagem original e a comprimida lado a lado usando Matplotlib.
     Adiciona os valores de PSNR e Limiar no título para comparação.
@@ -83,13 +83,21 @@ def mostrar_comparativo(original, comprimida, psnr_val, limiar):
     fig, ax = plt.subplots(1, 2, figsize=(12, 6))
     
     # Imagem original
+    titulo_original = "Original"
+    if tamanho_original is not None:
+        titulo_original += f" ({tamanho_original} bytes)"
+        
     ax[0].imshow(original, cmap='gray', vmin=0, vmax=255)
-    ax[0].set_title("Original")
+    ax[0].set_title(titulo_original)
     ax[0].axis('off')
     
     # Imagem comprimida
+    titulo_comprimida = f"Comprimida (Limiar: {limiar}) | PSNR: {psnr_val:.2f} dB"
+    if tamanho_comprimida is not None:
+        titulo_comprimida += f"\n({tamanho_comprimida} bytes)"
+        
     ax[1].imshow(comprimida, cmap='gray', vmin=0, vmax=255)
-    ax[1].set_title(f"Comprimida (Limiar: {limiar}) | PSNR: {psnr_val:.2f} dB")
+    ax[1].set_title(titulo_comprimida)
     ax[1].axis('off')
     
     plt.tight_layout()

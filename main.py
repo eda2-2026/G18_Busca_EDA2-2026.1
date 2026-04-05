@@ -20,6 +20,7 @@ def comprimir(entrada, saida, limiar):
     
     # 1. Carregar
     original = carregar(entrada)
+    tamanho_original_bytes = os.path.getsize(entrada)
     
     # 2. Estruturar a QuadTree
     qt = QuadTree(limiar=limiar)
@@ -47,6 +48,7 @@ def comprimir(entrada, saida, limiar):
         "folhas": stats["total_folhas"],
         "taxa_compressao": stats["taxa_compressao"],
         "tamanho_bytes": tamanho_bytes,
+        "tamanho_original_bytes": tamanho_original_bytes,
         "quadtree": qt,
         "original": original,
         "comprimida": comprimida
@@ -87,6 +89,7 @@ def grafico_limiares(resultados):
     psnrs = [r["psnr"] if r["psnr"] != float('inf') else 100.0 for r in resultados]
     folhas = [r["folhas"] for r in resultados]
     tamanhos = [r["tamanho_bytes"] for r in resultados]
+    tamanho_original = resultados[0]["tamanho_original_bytes"]
 
     fig, (ax1, ax3) = plt.subplots(2, 1, figsize=(10, 10))
 
@@ -110,10 +113,12 @@ def grafico_limiares(resultados):
     cor3 = 'tab:green'
     ax3.set_xlabel('Limiar de Variância')
     ax3.set_ylabel('Tamanho do Arquivo (Bytes)', color=cor3)
-    ax3.plot(limiares, tamanhos, marker='^', linestyle='-', color=cor3, label='Bytes')
+    ax3.plot(limiares, tamanhos, marker='^', linestyle='-', color=cor3, label='Tamanho Comprimido (Bytes)')
+    ax3.axhline(y=tamanho_original, color='purple', linestyle=':', label=f'Tamanho Original ({tamanho_original} bytes)')
     ax3.tick_params(axis='y', labelcolor=cor3)
     ax3.grid(True, linestyle='--', alpha=0.6)
     ax3.set_title('Tamanho Real da Árvore Serializada vs Limiar')
+    ax3.legend()
 
     fig.tight_layout()
     plt.show()
@@ -150,7 +155,14 @@ if __name__ == "__main__":
     res_comum = comprimir(imagem_teste, saida_teste, limiar=15.0)
     
     print("\nAbrindo Comparativo Visual da compressão única...")
-    mostrar_comparativo(res_comum['original'], res_comum['comprimida'], res_comum['psnr'], res_comum['limiar'])
+    mostrar_comparativo(
+        res_comum['original'], 
+        res_comum['comprimida'], 
+        res_comum['psnr'], 
+        res_comum['limiar'],
+        res_comum['tamanho_original_bytes'],
+        res_comum['tamanho_bytes']
+    )
     
     print("\nAbrindo Desenho de Blocos (Isso mostrará as partições da QuadTree)...")
     desenhar_blocos(res_comum['original'], res_comum['quadtree'])
