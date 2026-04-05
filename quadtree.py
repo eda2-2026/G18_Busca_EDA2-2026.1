@@ -141,6 +141,42 @@ class QuadTree:
             assert filho is not None
             self._inserir_recursivo(filho, pixels)
 
+    def reconstruir(self, shape: tuple) -> np.ndarray:
+        """
+        Reconstrói a imagem a partir da Quadtree, preenchendo cada folha com sua cor média.
+        Cada folha representa um bloco homogêneo da imagem original, e a cor média é usada para preencher esse bloco na imagem reconstruída.
+
+        shape: tupla (altura, largura) da imagem original
+        Retorna um array 2D de pixels reconstruídos a partir da Quadtree.
+        """
+
+        if self.raiz is None:
+            raise ValueError(
+                "A Quadtree está vazia. Insira uma imagem antes de reconstruir."
+            )
+
+        # cria array zerada com o mesmo formato da imagem original
+        imagem = np.zeros(shape, dtype=np.uint8)
+
+        self._reconstruir_recursivo(self.raiz, imagem)
+        return imagem
+
+    def _reconstruir_recursivo(self, no: NodeQuadTree, imagem: np.ndarray):
+        """
+        DFS na arvore:
+            - se folha: preenche o bloco correspondente na imagem com a cor média
+            - se nó interno: continua recursão nos filhos
+        """
+
+        if no.eh_folha:
+            imagem[no.y : no.y + no.altura, no.x : no.x + no.largura] = no.cor_media
+            return
+
+        # No interno: continua recursão nos filhos
+        for filho in no.filhos:
+            if filho is not None:
+                self._reconstruir_recursivo(filho, imagem)
+
     def taxa_de_compressao(self, total_pixels: int) -> float:
         """
         Percentual de reducao de dados

@@ -1,16 +1,17 @@
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from quadtree import NodeQuadTree, QuadTree
 
 # ── Teste NoQuadtree ──────────────────────────────────────
-no = NodeQuadTree(x=0, y=0, width=512, height=512, level=0)
+no = NodeQuadTree(x=0, y=0, largura=512, altura=512, level=0)
 
 assert no.x == 0
 assert no.y == 0
-assert no.width == 512
-assert no.height == 512
+assert no.largura == 512
+assert no.altura == 512
 assert no.level == 0
 assert no.cor_media == 0
 assert no.variancia == 0.0
