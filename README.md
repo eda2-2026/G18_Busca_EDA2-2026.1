@@ -19,53 +19,53 @@ Além da compressão, o sistema implementa busca espacial: dado um par de coorde
 
 ---
 
-## Justificativa e Teoria
+## Por que Quadtree? 
 
 ### O problema de representar imagens
 
-Uma imagem em escala de cinza de 512x512 pixels ocupa 262.144 bytes quando armazenada de forma bruta (um byte por pixel). Para processar, buscar ou transmitir essa imagem, qualquer operação que percorra todos os pixels tem custo **O(n)** onde `n = largura × altura`. Para imagens maiores — como fotografias de 4K (8.294.400 pixels) — esse custo se torna proibitivo.
+Uma imagem em escala de cinza de 512x512 pixels ocupa 262.144 bytes quando armazenada de forma bruta (um byte por pixel). Para processar, buscar ou transmitir essa imagem, qualquer operacao que percorra todos os pixels tem custo **O(n)** onde `n = largura × altura`. Para imagens maiores — como fotografias de 4K (8.294.400 pixels) — esse custo se torna proibitivo.
 
-O desafio central é: como representar e operar sobre imagens de forma que regiões homogêneas (como céu, paredes, fundos lisos) não exijam o mesmo custo computacional que regiões complexas (bordas, texturas, detalhes)?
+O desafio central e: como representar e operar sobre imagens de forma que regioes homogeneas (como ceu, paredes, fundos lisos) nao exijam o mesmo custo computacional que regioes complexas (bordas, texturas, detalhes)?
 
-### Quadtree como solução estrutural
+### Quadtree como solucao estrutural
 
-A **Quadtree** é uma árvore onde cada nó interno possui exatamente quatro filhos, cada um correspondendo a um quadrante espacial (noroeste, nordeste, sudoeste, sudeste). Essa propriedade reflete diretamente a estrutura hierárquica de uma imagem:
+A **Quadtree** e uma arvore onde cada no interno possui exatamente quatro filhos, cada um correspondendo a um quadrante espacial (noroeste, nordeste, sudoeste, sudeste). Essa propriedade reflete diretamente a estrutura hierarquica de uma imagem:
 
-- **Folhas** representam blocos homogêneos — toda uma região é descrita por um único valor (a cor média), independentemente do seu tamanho em pixels.
-- **Nós internos** representam regiões heterogêneas que precisam ser subdivididas para maior fidelidade.
+- **Folhas** representam blocos homogeneos — toda uma regiao e descrita por um unico valor (a cor media), independentemente do seu tamanho em pixels.
+- **Nos internos** representam regioes heterogeneas que precisam ser subdivididas para maior fidelidade.
 
-O ganho de performance é concreto:
+O ganho de performance e concreto:
 
-| Operação | Array 2D bruto | Quadtree |
+| Operacao | Array 2D bruto | Quadtree |
 |---|---|---|
-| Reconstrução de imagem | O(largura × altura) | O(número de folhas) |
+| Reconstrucao de imagem | O(largura × altura) | O(numero de folhas) |
 | Busca por pixel (x, y) | O(1) com acesso direto, mas sem contexto espacial | O(log n) percorrendo a hierarquia |
-| Compressão / armazenamento | O(largura × altura) por pixel | O(folhas) — regiões uniformes custam 9 bits |
-| Comparação entre imagens | O(largura × altura) | O(folhas comuns) com poda de subárvores idênticas |
+| Compressao / armazenamento | O(largura × altura) por pixel | O(folhas) — regioes uniformes custam 9 bits |
+| Comparacao entre imagens | O(largura × altura) | O(folhas comuns) com poda de subarvores identicas |
 
-Em imagens com grandes áreas uniformes (o caso comum em fotografias com céu, paredes e fundos), o número de folhas é muito menor que o total de pixels. Uma imagem 256x256 com apenas 4 regiões uniformes pode ser representada por **4 folhas** em vez de 65.536 pixels — uma redução de mais de 16.000x.
+Em imagens com grandes areas uniformes (o caso comum em fotografias com ceu, paredes e fundos), o numero de folhas e muito menor que o total de pixels. Uma imagem 256x256 com apenas 4 regioes uniformes pode ser representada por **4 folhas** em vez de 65.536 pixels — uma reducao de mais de 16.000x.
 
 ### Busca por pixel: O(profundidade) em vez de O(n)
 
-A busca espacial é uma das operações onde a Quadtree demonstra sua vantagem mais clara. Dado um par de coordenadas `(x, y)`, o algoritmo:
+A busca espacial e uma das operacoes onde a Quadtree demonstra sua vantagem mais clara. Dado um par de coordenadas `(x, y)`, o algoritmo:
 
 1. Inicia na raiz, que cobre toda a imagem.
-2. Em cada nó interno, determina em qual dos quatro quadrantes `(x, y)` se encontra — operação O(1).
+2. Em cada no interno, determina em qual dos quatro quadrantes `(x, y)` se encontra — operacao O(1).
 3. Desce recursivamente para esse quadrante.
-4. Para na folha que cobre o pixel, retornando sua cor média.
+4. Para na folha que cobre o pixel, retornando sua cor media.
 
-O custo total é **O(profundidade da árvore)**, que é logarítmico em relação ao tamanho da imagem. Para uma imagem 512x512 com `max_nivel=8`, o pior caso é 8 comparações — em vez de percorrer até 262.144 pixels em uma busca linear.
+O custo total e **O(profundidade da arvore)**, que e logaritmico em relacao ao tamanho da imagem. Para uma imagem 512x512 com `max_nivel=8`, o pior caso e 8 comparacoes — em vez de percorrer ate 262.144 pixels em uma busca linear.
 
-Essa eficiência é fundamental em aplicações reais como:
-- **Sistemas de informação geográfica (GIS)**: localizar em qual região do mapa um ponto está.
-- **Motores de jogos**: detectar colisões espaciais sem comparar todos os objetos entre si.
-- **Visão computacional**: segmentar regiões de interesse sem processar cada pixel individualmente.
+Essa eficiencia e fundamental em aplicacoes reais como:
+- **Sistemas de informacao geografica (GIS)**: localizar em qual regiao do mapa um ponto esta.
+- **Motores de jogos**: detectar colisoes espaciais sem comparar todos os objetos entre si.
+- **Visao computacional**: segmentar regioes de interesse sem processar cada pixel individualmente.
 
-### Relação entre estrutura de dados e performance
+### Relacao entre estrutura de dados e performance
 
-A Quadtree não é apenas uma escolha de implementação — é uma decisão arquitetural que muda a complexidade assintótica das operações fundamentais do sistema. Enquanto um array bidimensional oferece acesso O(1) por índice mas sem estrutura espacial hierárquica, a Quadtree troca esse acesso direto por uma organização que espelha a natureza da informação contida na imagem.
+A Quadtree nao e apenas uma escolha de implementacao — e uma decisao arquitetural que muda a complexidade assintótica das operacoes fundamentais do sistema. Enquanto um array bidimensional oferece acesso O(1) por indice mas sem estrutura espacial hierarquica, a Quadtree troca esse acesso direto por uma organizacao que espelha a natureza da informacao contida na imagem.
 
-O resultado prático é visível nas métricas do projeto: com limiar 20, uma fotografia típica tem sua representação reduzida em ~98% enquanto mantém PSNR acima de 30 dB — qualidade visual boa o suficiente para a maioria das aplicações, com uma fração do custo de armazenamento e processamento.
+O resultado pratico e visivel nas metricas do projeto: com limiar 20, uma fotografia tipica tem sua representacao reduzida em ~98% enquanto mantém PSNR acima de 30 dB — qualidade visual boa o suficiente para a maioria das aplicacoes, com uma fracao do custo de armazenamento e processamento.
 
 ---
 
